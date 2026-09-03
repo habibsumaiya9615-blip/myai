@@ -14,7 +14,7 @@ jobs:
         with:
           java-version: 21
           distribution: temurin
-      - run: npm install
+      - run: npm install && npm install @capacitor/android @capacitor/core
       - run: npm install -g @capacitor/cli
       - run: npx cap init MyAI com.myai.app --web-dir public
       - run: npx cap add android
