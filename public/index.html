@@ -1,59 +1,116 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AI Assistant</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: Arial, sans-serif; background: #1a1a2e; color: white; height: 100vh; display: flex; flex-direction: column; }
-.header { background: #16213e; padding: 15px; text-align: center; font-size: 20px; font-weight: bold; color: #00d4ff; }
-.chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-.message { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 15px; line-height: 1.5; }
-.user { background: #0f3460; align-self: flex-end; }
-.ai { background: #16213e; align-self: flex-start; border: 1px solid #00d4ff33; }
-.input-area { background: #16213e; padding: 15px; display: flex; gap: 10px; }
-.input-area input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #00d4ff; background: #1a1a2e; color: white; font-size: 15px; outline: none; }
-.input-area button { padding: 12px 20px; border-radius: 25px; border: none; background: #00d4ff; color: #1a1a2e; font-weight: bold; cursor: pointer; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#f0f4ff;font-family:'Segoe UI',sans-serif;height:100vh;display:flex;flex-direction:column}
+#connectScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#667eea,#764ba2)}
+#connectBtn{width:160px;height:160px;border-radius:50%;border:6px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.15);color:#fff;font-size:18px;font-weight:bold;cursor:pointer;transition:all 0.3s;box-shadow:0 0 40px rgba(255,255,255,0.2)}
+#connectBtn:hover{background:rgba(255,255,255,0.3);transform:scale(1.05)}
+#connectBtn.connected{background:rgba(100,255,150,0.3);border-color:rgba(100,255,150,0.8);box-shadow:0 0 60px rgba(100,255,150,0.4)}
+.status{color:rgba(255,255,255,0.8);margin-top:20px;font-size:16px}
+#appTitle{color:#fff;font-size:28px;font-weight:bold;margin-bottom:40px;letter-spacing:2px}
+#chatScreen{display:none;flex-direction:column;height:100vh}
+#header{background:linear-gradient(135deg,#667eea,#764ba2);padding:16px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 20px rgba(102,126,234,0.3)}
+#header h2{color:#fff;font-size:18px;flex:1}
+#statusDot{width:10px;height:10px;border-radius:50%;background:#4eff91;box-shadow:0 0 8px #4eff91}
+#chatBox{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:#f0f4ff}
+.ai{background:#fff;padding:14px;border-radius:18px 18px 18px 4px;max-width:80%;box-shadow:0 2px 12px rgba(0,0,0,0.08);animation:slideIn 0.3s ease}
+.user{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:14px;border-radius:18px 18px 4px 18px;max-width:80%;align-self:flex-end;box-shadow:0 2px 12px rgba(102,126,234,0.3);animation:slideIn 0.3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.typing{display:flex;gap:4px;padding:14px;background:#fff;border-radius:18px;width:60px;box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+.dot{width:8px;height:8px;border-radius:50%;background:#667eea;animation:bounce 1s infinite}
+.dot:nth-child(2){animation-delay:0.2s}
+.dot:nth-child(3){animation-delay:0.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
+#inputArea{display:flex;padding:12px;gap:8px;background:#fff;box-shadow:0 -2px 20px rgba(0,0,0,0.08)}
+#msg{flex:1;padding:12px 18px;border-radius:24px;border:2px solid #e0e7ff;background:#f8f9ff;font-size:16px;outline:none;transition:border 0.3s}
+#msg:focus{border-color:#667eea}
+#sendBtn{padding:12px 24px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:24px;font-size:16px;cursor:pointer;box-shadow:0 4px 15px rgba(102,126,234,0.4)}
 </style>
 </head>
 <body>
-<div class="header">🤖 AI Assistant</div>
-<div class="chat-box" id="chatBox">
-<div class="message ai">আসসালামুয়ালাইকুম! আমি তোমার AI Assistant।</div>
+<div id="connectScreen">
+  <div id="appTitle">🤖 AI Agent</div>
+  <button id="connectBtn" onclick="toggleConnect()">
+    <div>CONNECT</div>
+  </button>
+  <div class="status" id="statusText">সংযুক্ত নয়</div>
 </div>
-<div class="input-area">
-<input type="text" id="userInput" placeholder="বাংলায় লিখুন..." onkeypress="if(event.key==='Enter')sendMessage()">
-<button onclick="sendMessage()">পাঠাও</button>
+<div id="chatScreen">
+  <div id="header">
+    <div id="statusDot"></div>
+    <h2>AI Assistant</h2>
+    <button onclick="disconnect()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:6px 12px;border-radius:12px;cursor:pointer">বন্ধ করো</button>
+  </div>
+  <div id="chatBox">
+    <div class="ai">আসসালামুয়ালাইকুম! আমি তোমার AI Assistant। কী করতে চাও?</div>
+  </div>
+  <div id="inputArea">
+    <input id="msg" placeholder="বাংলায় লিখুন..." />
+    <button id="sendBtn" onclick="send()">পাঠাও</button>
+  </div>
 </div>
 <script>
-async function sendMessage() {
-  const input = document.getElementById('userInput');
-  const msg = input.value.trim();
+const API_KEY = 'AQ.Ab8RN6IGou1XBR91Ke28uKrJd5a66PpjldBkgXkTMA6CEp7zNA';
+let connected = false;
+function toggleConnect() {
+  if (!connected) {
+    connected = true;
+    document.getElementById('connectBtn').classList.add('connected');
+    document.getElementById('connectBtn').innerHTML = '<div>✓</div><div style="font-size:13px">সংযুক্ত</div>';
+    document.getElementById('statusText').textContent = 'সংযুক্ত হচ্ছে...';
+    setTimeout(() => {
+      document.getElementById('connectScreen').style.display = 'none';
+      document.getElementById('chatScreen').style.display = 'flex';
+    }, 1500);
+  }
+}
+function disconnect() {
+  connected = false;
+  document.getElementById('connectScreen').style.display = 'flex';
+  document.getElementById('chatScreen').style.display = 'none';
+  document.getElementById('connectBtn').classList.remove('connected');
+  document.getElementById('connectBtn').innerHTML = '<div>CONNECT</div>';
+  document.getElementById('statusText').textContent = 'সংযুক্ত নয়';
+}
+async function send() {
+  const msg = document.getElementById('msg').value;
   if (!msg) return;
   addMessage(msg, 'user');
-  input.value = '';
+  document.getElementById('msg').value = '';
+  const typing = document.createElement('div');
+  typing.className = 'typing';
+  typing.id = 'typing';
+  typing.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+  document.getElementById('chatBox').appendChild(typing);
   try {
-    const res = await fetch('http://localhost:3000/chat', {
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' + API_KEY, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({message: msg})
+      body: JSON.stringify({contents:[{parts:[{text: msg}]}]})
     });
     const data = await res.json();
-    if (data.success) addMessage(data.reply, 'ai');
-    else addMessage('সমস্যা হয়েছে!', 'ai');
+    document.getElementById('typing')?.remove();
+    const reply = data.candidates[0].content.parts[0].text;
+    addMessage(reply, 'ai');
   } catch(e) {
-    addMessage('Server এর সাথে সংযোগ নেই!', 'ai');
+    document.getElementById('typing')?.remove();
+    addMessage('সমস্যা হয়েছে!', 'ai');
   }
 }
 function addMessage(text, type) {
   const box = document.getElementById('chatBox');
   const div = document.createElement('div');
-  div.className = 'message ' + type;
+  div.className = type;
   div.textContent = text;
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
 }
+document.getElementById('msg').addEventListener('keypress', e => { if(e.key==='Enter') send(); });
 </script>
 </body>
 </html>
