@@ -55,7 +55,7 @@ body{background:#f0f4ff;font-family:'Segoe UI',sans-serif;height:100vh;display:f
   </div>
 </div>
 <script>
-const API_KEY = 'AQ.Ab8RN6IGou1XBR91Ke28uKrJd5a66PpjldBkgXkTMA6CEp7zNA';
+const API_KEY = localStorage.getItem('gkey') || prompt('Gemini API Key:'); localStorage.setItem('gkey', API_KEY);
 let connected = false;
 function toggleConnect() {
   if (!connected) {
